@@ -13,6 +13,10 @@ services:
                 condition: service_started
         ports:
             - 80:80
+        networks:
+            macvlan_net:
+                ipv4_address: 192.168.0.38  # Unique LAN IP for DMZ
+            internal_net: {}  # Internal network for communication with mongo and redis
         stop_grace_period: 60s
         volumes:
             - ~/sharelatex_data:/var/lib/overleaf
@@ -110,6 +114,8 @@ services:
             - ./mongodb-init-replica-set.js:/docker-entrypoint-initdb.d/mongodb-init-replica-set.js
         environment:
           MONGO_INITDB_DATABASE: sharelatex
+        networks:
+            internal_net: {}  # Only accessible on internal network
         extra_hosts:
           # Required when using the automatic database setup for initializing the replica set.
           # This override is not needed when running the setup after starting up mongo.
@@ -124,6 +130,8 @@ services:
         restart: always
         image: redis:6.2
         container_name: redis
+        networks:
+            internal_net: {}  # Only accessible on internal network
         volumes:
             - ~/redis_data:/data
 
@@ -146,3 +154,15 @@ services:
     #     volumes:
     #       - /var/run/docker.sock:/tmp/docker.sock:ro
     #       - /home/overleaf/tmp:/etc/nginx/certs
+    
+networks:
+    macvlan_net:
+        driver: macvlan
+        driver_opts:
+            parent: eth0  # Replace eth0 with your Raspberry Pi's network interface
+        ipam:
+            config:
+                - subnet: 192.168.0.0/24  # Your LAN subnet
+                  gateway: 192.168.0.1  # Your LAN gateway
+    internal_net:
+        driver: bridge  # Default Docker bridge network
