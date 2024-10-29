@@ -970,6 +970,7 @@ module.exports = {
     'launchpad',
     'server-ce-scripts',
     'user-activate',
+    'track-changes',
   ],
   viewIncludes: {},
 
@@ -995,7 +996,15 @@ module.exports = {
   managedUsers: {
     enabled: false,
   },
+  
+  splitTestOverrides: {
+//  'history-ranges-support': 'enabled',
+    'math-preview': 'enabled',
+  },
+  
 }
+
+
 
 module.exports.mergeWith = function (overrides) {
   return merge(overrides, module.exports)
