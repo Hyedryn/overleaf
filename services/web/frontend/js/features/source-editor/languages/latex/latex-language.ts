@@ -133,8 +133,10 @@ export const LaTeXLanguage = LRLanguage.define({
           ['IncludeGraphics'],
           ['LineBreak'],
           ['UsePackage'],
+          ['FigureEnvironment', 'BeginEnv'],
+          ['ListEnvironment', 'BeginEnv'],
         ],
-        ShortTextArgument: [['Date']],
+        ShortTextArgument: [['Date'], ['SetLengthCommand']],
         TextArgument: [['TabularEnvironment', 'BeginEnv']],
       }),
       // TODO: does this override groups defined in the grammar?

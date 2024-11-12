@@ -1,6 +1,6 @@
-const fs = require('fs')
-const { pipeline } = require('stream/promises')
-const { PassThrough } = require('stream')
+const fs = require('node:fs')
+const { pipeline } = require('node:stream/promises')
+const { PassThrough } = require('node:stream')
 const { Storage, IdempotencyStrategy } = require('@google-cloud/storage')
 const { WriteError, ReadError, NotFoundError } = require('./Errors')
 const asyncPool = require('tiny-async-pool')
@@ -78,10 +78,14 @@ module.exports = class GcsPersistor extends AbstractPersistor {
         writeOptions.metadata = writeOptions.metadata || {}
         writeOptions.metadata.contentEncoding = opts.contentEncoding
       }
+      const fileOptions = {}
+      if (opts.ifNoneMatch === '*') {
+        fileOptions.generation = 0
+      }
 
       const uploadStream = this.storage
         .bucket(bucketName)
-        .file(key)
+        .file(key, fileOptions)
         .createWriteStream(writeOptions)
 
       await pipeline(readStream, observer, uploadStream)
@@ -97,7 +101,7 @@ module.exports = class GcsPersistor extends AbstractPersistor {
       throw PersistorHelper.wrapError(
         err,
         'upload to GCS failed',
-        { bucketName, key },
+        { bucketName, key, ifNoneMatch: opts.ifNoneMatch },
         WriteError
       )
     }
